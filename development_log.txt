@@ -1,0 +1,6 @@
+## 2026-07-14
+- Dental_013 (Restoration Classifier) 레포지토리 초기 구조 설계
+- 2-Stage Architecture 확립 (Dental_008 연동 목적)
+- Kaggle 데이터셋 다운로드 스크립트(`download_data.py`) 작성
+- 데이터 전처리 스크립트(`prepare_data.py`) 작성 (YOLO Bbox 기반 치아 Crop)
+- PyTorch 기반 EfficientNet-B0 학습(`train.py`) 및 추론(`predict.py`) 스크립트 작성
