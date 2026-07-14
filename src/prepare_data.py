@@ -13,26 +13,25 @@ def prepare_dataset():
     processed_dir = os.path.join(base_dir, "data", "processed")
     
     # Assuming Kaggle dataset extracts into something like:
-    # raw/train/images/, raw/train/labels/
-    # raw/valid/images/, raw/valid/labels/
+    # data/raw/YOLO/YOLO/train/images/, data/raw/YOLO/YOLO/train/labels/
+    yolo_dir = os.path.join(raw_dir, "YOLO", "YOLO")
     
-    # Class mapping based on user's definition
-    # Ensure this matches the Kaggle dataset's actual classes.yaml
+    # Class mapping based on actual Kaggle dataset's data.yaml
     class_mapping = {
-        0: "Crown",
-        1: "Filling",
-        2: "Implant",
-        3: "RCT",
-        4: "Periapical_Lesion",
-        5: "Impacted_Tooth",
-        6: "Natural" # May need to be derived from empty areas
+        1: "Crown",
+        2: "Filling",
+        3: "Implant",
+        9: "RCT",
+        25: "Other", # post - core
+        18: "Other", # abutment
+        # Note: 'Natural' might need to be generated separately if we want to classify healthy teeth.
     }
     
     splits = ["train", "valid"]
     
     for split in splits:
-        img_dir = os.path.join(raw_dir, split, "images")
-        lbl_dir = os.path.join(raw_dir, split, "labels")
+        img_dir = os.path.join(yolo_dir, split, "images")
+        lbl_dir = os.path.join(yolo_dir, split, "labels")
         
         if not os.path.exists(img_dir) or not os.path.exists(lbl_dir):
             print(f"Skipping {split} split, directories not found.")
