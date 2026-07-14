@@ -34,7 +34,8 @@ def train_model():
     image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x])
                       for x in ['train', 'val']}
     
-    dataloaders = {x: DataLoader(image_datasets[x], batch_size=32, shuffle=True, num_workers=4)
+    # RTX 5080 16GB VRAM + Ryzen 9900X 최적화
+    dataloaders = {x: DataLoader(image_datasets[x], batch_size=128, shuffle=True, num_workers=8, pin_memory=True)
                    for x in ['train', 'val']}
                    
     dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
@@ -53,9 +54,12 @@ def train_model():
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model_ft.parameters(), lr=0.001)
     
-    # Simple training loop (for 10 epochs as default)
-    num_epochs = 10
+    # Extended training loop with Early Stopping
+    num_epochs = 100
+    best_loss = float('inf')
     best_acc = 0.0
+    patience = 15
+    epochs_no_improve = 0
     
     os.makedirs(os.path.join(base_dir, "models"), exist_ok=True)
     
@@ -94,12 +98,23 @@ def train_model():
 
             print(f'{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}')
 
-            # Save best model
-            if phase == 'val' and epoch_acc > best_acc:
-                best_acc = epoch_acc
-                torch.save(model_ft.state_dict(), os.path.join(base_dir, "models", "best_restoration_model.pth"))
+            # Early Stopping and Save best model based on val loss
+            if phase == 'val':
+                if epoch_acc > best_acc:
+                    best_acc = epoch_acc
+                
+                if epoch_loss < best_loss:
+                    best_loss = epoch_loss
+                    epochs_no_improve = 0
+                    torch.save(model_ft.state_dict(), os.path.join(base_dir, "models", "best_restoration_model.pth"))
+                else:
+                    epochs_no_improve += 1
+                    
+        if epochs_no_improve >= patience:
+            print(f'Early stopping triggered after {epoch+1} epochs.')
+            break
 
-    print(f'Training complete. Best Val Acc: {best_acc:4f}')
+    print(f'Training complete. Best Val Loss: {best_loss:.4f}, Best Val Acc: {best_acc:.4f}')
     
 if __name__ == '__main__':
     train_model()

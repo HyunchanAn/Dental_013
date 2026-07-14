@@ -1,8 +1,10 @@
 # Dental_013: Restoration & Prosthesis Classifier
 
-![Status](https://img.shields.io/badge/Status-v1.0%20Release-brightgreen) ![Python](https://img.shields.io/badge/Python-3.12%2B-blue) ![Backend](https://img.shields.io/badge/Backend-PyTorch%20EfficientNet-red) ![Integration](https://img.shields.io/badge/Integration-Dental%5F008-orange)
+![Status](https://img.shields.io/badge/Status-v1.0%20Release-brightgreen) ![Python](https://img.shields.io/badge/Python-3.12%2B-blue) ![Backend](https://img.shields.io/badge/Backend-YOLOv8-red) ![UI](https://img.shields.io/badge/UI-Streamlit-orange) ![CI/CD Pipeline](https://img.shields.io/badge/CI%2FCD%20Pipeline-passing-brightgreen?logo=github)
 
 ## 개요
+> **[학습 환경 사양]** 실질적 모델 학습은 **RTX 5080 + 라이젠9-6 9900x** 환경에서 진행되었습니다.
+
 파노라마 방사선 사진에서 분할(Segmentation)된 개별 치아 이미지를 입력받아, 해당 치아의 수복물 및 보철물 상태(Crown, Implant, Filling, RCT 등)를 판별하는 딥러닝 분류(Classification) 모듈입니다.
 
 기존 `Dental_008` (치아 분할 및 FDI 번호 부여 모듈)과 연동되는 **2-Stage 아키텍처**로 작동합니다. `Dental_008`이 전체 파노라마에서 개별 치아를 분할 및 Crop하면, 이 모듈(`Dental_013`)이 해당 Crop된 이미지를 바탕으로 치아의 상태를 판별합니다.
