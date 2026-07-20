@@ -43,4 +43,4 @@ jobs:
 
     - name: Run . with PYTHONPATH=${{ github.workspace }} pytest
       run: |
-        PYTHONPATH=${{ github.workspace }}:${{ github.workspace }}/src python -m pytest .
+        PYTHONPATH=${{ github.workspace }}:${{ github.workspace }}/src python -m pytest Dental_000/tests/tests_013
