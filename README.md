@@ -45,3 +45,7 @@ python src/predict.py <path_to_cropped_image>
 ## References
 * **Kaggle Dataset:** [Dental Disease Panoramic Detection Dataset](https://www.kaggle.com/datasets/lokisilvres/dental-disease-panoramic-detection-dataset)
 * **Architecture:** 2-Stage Pipeline with Dental_008
+
+
+## 가중치 파일 안내
+본 모듈의 추론 가중치는 PyTorch .pt에서 .onnx 형식으로 마이그레이션 되었습니다. weights/best.onnx 파일을 사용하여 Inference가 수행됩니다.
