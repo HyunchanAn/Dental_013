@@ -5,3 +5,11 @@ __pycache__/
 *.pt
 .DS_Store
 *.onnx
+
+# Security & Hygiene
+.env
+*.pt
+*.pth
+*.onnx
+__pycache__/
+.venv/
