@@ -1,12 +1,14 @@
-## 2026-07-14
+2026-07-14
 - Dental_013 (Restoration Classifier) 레포지토리 초기 구조 설계
 - 2-Stage Architecture 확립 (Dental_008 연동 목적)
 - Kaggle 데이터셋 다운로드 스크립트(`download_data.py`) 작성
 - 데이터 전처리 스크립트(`prepare_data.py`) 작성 (YOLO Bbox 기반 치아 Crop)
 - PyTorch 기반 EfficientNet-B0 학습(`train.py`) 및 추론(`predict.py`) 스크립트 작성
 
-## 2026-10-20
+2026-10-20
 - `README.md`에 단독 치아 ROI 분류기(`EfficientNet-B0`)와 통합 파이프라인용 31-Class YOLOv8-seg ONNX(`best_restoration_model.onnx`, 4대 임상 수복물 범주 매핑) 이중 아키텍처, 10대 케이스 정량 벤치마크(`10_cases_quantitative_benchmark.json`) 성적, Kaggle 데이터셋 출처·이용조건을 명확히 문서화.
 - `tests/test_predict.py` 단위 테스트 추가 및 `pytest` 통과 검증 완료.
 - `LICENSE`(MIT License) 파일 추가.
 
+2026-10-25
+- 전 시리즈 개발일지(`development_log.txt`) 단일 표준 양식 통일 완료.
