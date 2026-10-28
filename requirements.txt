@@ -1,1 +1,7 @@
+numpy
+opencv-python-headless
+Pillow
+torch>=2.0.0
+torchvision
+onnxruntime
 git+https://github.com/HyunchanAn/Dental_Core.git@main
