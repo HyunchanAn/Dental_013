@@ -42,9 +42,9 @@
 
 - 초기 `Dental_000` 문서에 기재되었던 `31종 YOLOv8-seg 88.5% / 84.2%` 수치는 프로토타입 단계의 내부 검증 요약치였으며, 과거 감사 문서의 `데이터/라벨 준비 전 보류` 표기는 본 레포지토리의 단독 `EfficientNet-B0` 크롭 분류기(`src/train.py`) 로컬 데이터셋 미배치 상태를 지칭한 것이었습니다.
 - 현재 프로덕션 통합 파이프라인(`Dental_Panoramic_Reader`)에서는 `best_restoration_model.onnx` (31-class YOLOv8-seg) 가중치를 통해 전체 파노라마 영상에서 직접 수복물을 검출하고 4대 임상 범주로 매핑합니다.
-- [10대 임상 케이스 정량 벤치마크 (`10_cases_quantitative_benchmark.json`, `IoU >= 0.50` 엄격 매칭 기준)]:
-  - 수복물 전용 케이스 검출 성공률(Case-level Detection Rate): `100%` (전용 테스트 케이스 3건 및 복합 케이스 1건 모두에서 누락 없이 수복물 인스턴스 검출 성공)
-  - 케이스별 인스턴스 매칭 성적 (`IoU >= 0.50`, 4대 수복물 범주):
+- [10대 임상 케이스 정량 벤치마크 (`Dental_000/reports_archive/10_cases_quantitative_benchmark.json`, `IoU >= 0.50` 엄격 매칭 기준)]:
+  - 수복물 보유 4례 기준 증례 단위(Case-level Any-hit) 검출률: `4/4 (100.0%)` (전용 테스트 케이스 3건 및 복합 케이스 1건 모두에서 수복물 1건 이상 검출 성공, 10례 전체 평균 5.30개/증례 검출)
+  - 개별 객체 단위(Instance-level `IoU >= 0.50`, 4대 수복물 범주) 매칭 성적 (Recall `34.4% ~ 48.1%`, Precision `44.0% ~ 76.2%`):
     - `case_013_restoration_1.jpg` (`Gold=32`): `TP=11`, `FP=14`, `FN=21` (Precision `44.0%`, Recall `34.4%`)
     - `case_013_restoration_2.jpg` (`Gold=38`): `TP=16`, `FP=5`, `FN=22` (Precision `76.2%`, Recall `42.1%`)
     - `case_013_restoration_3.jpg` (`Gold=27`): `TP=13`, `FP=10`, `FN=14` (Precision `56.5%`, Recall `48.1%`)
