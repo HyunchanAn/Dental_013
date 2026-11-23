@@ -15,8 +15,8 @@
 ## 주요 기능 및 아키텍처
 
 ### 1. 단독 치아 ROI 분류기 (Standalone Tooth-ROI Torchvision Classifier)
-- 구성 파일: `src/prepare_data.py`, `src/train.py`, `src/predict.py`
-- 동작 방식: `Dental_008`(치아 분할 모듈) 또는 YOLO 바운딩 박스로 크롭(Crop)된 개별 치아 ROI 이미지를 입력받아 `torchvision`의 `EfficientNet-B0` 백본(`num_classes=7`: `Bridge`, `Crown`, `Filling`, `Implant`, `Natural`, `Other`, `RCT`)으로 상태를 분류하는 2-Stage 파이프라인입니다.
+- 구성 파일: `src/prepare_data.py`, `src/train.py`, `src/predict.py`, `src/tooth_crop_bridge.py`
+- 동작 방식: `Dental_008`(치아 분할 모듈) 또는 YOLO 바운딩 박스로 크롭(Crop)된 개별 치아 ROI 이미지를 입력받아 `torchvision`의 `EfficientNet-B0` 백본(`num_classes=7`: `Bridge`, `Crown`, `Filling`, `Implant`, `Natural`, `Other`, `RCT`)으로 상태를 분류하고, `Dental_Core` 표준 스키마(`PanoramaHiTLDocument`)의 치아별 `restoration_tags`(`Crown/Bridge`, `Inlay/Onlay`, `Implant`, `Endodontic (RCT)`) 및 `Dental_015` 오버레이 배지로 직렬화하는 2-Stage 파이프라인입니다.
 
 ### 2. 통합 파이프라인 31-Class YOLOv8-seg ONNX 모델 (`Dental_Panoramic_Reader` 연동)
 - 가중치 식별자: Hugging Face `chemahc94/Dental_013` (`models/best_restoration_model.onnx`, 입력 해상도 `640x640`, 31개 원본 치과 소견 클래스 내장)

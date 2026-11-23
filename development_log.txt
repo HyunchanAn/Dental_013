@@ -15,3 +15,8 @@
 
 2026-10-28
 - 이슈 #2 해결: `requirements.txt`에 `onnxruntime`, `torch`, `torchvision`, `Pillow`, `numpy`, `opencv-python-headless`를 명시하고 `.github/workflows/ci.yml`에서 로컬 단위 테스트(`tests/`)와 중앙 테스트(`Dental_000/tests/tests_013`)를 함께 실행하도록 정비하여 원격 GitHub Actions CI 복구 완료.
+
+2026-11-23
+- 이슈 #3 해결 (`[P1] 008 치아 Crop 기반 수복물·보철(Crown/Implant/Filling/RCT) 분류 연동`):
+  - `src/predict.py` 확장: 인메모리 치아 Crop 배열 추론(`predict_crop_array`) 및 7종 원본 클래스의 4대 SSOT 임상 범주(`Crown/Bridge`, `Inlay/Onlay`, `Implant`, `Endodontic (RCT)`) 매핑 함수(`map_raw_restoration_to_ssot`) 구현.
+  - `src/tooth_crop_bridge.py` 신설: `Dental_008` 치아 ROI Crop(25% 문맥 패딩) 기반 개별 치아 분류와 전악 31-Class YOLOv8-seg 공간 매칭(IoA·중심점)을 결합하여 `PanoramaHiTLDocument` 치아별 `restoration_tags` 및 `Dental_015` 오버레이 태그로 직렬화하는 브리지 모듈 구현 (`tests/test_tooth_crop_bridge.py` 포함 총 6건 테스트 통과).
