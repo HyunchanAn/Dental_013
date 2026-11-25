@@ -5,26 +5,33 @@ from dental_core.core.onnx_exporter import (
     export_classifier_to_onnx,
 )
 
-# NOTE: Adjust MODEL_TYPE to "yolo" or "classifier" based on this module's architecture
-MODEL_TYPE = "yolo"
-REPO_ID = "HyunchanAn/Dental_013"
-PT_PATH = "weights/best.pt"  # Update path if different
+MODEL_TYPE = "classifier"
+REPO_ID = "chemahc94/Dental_013"
+PT_PATH = "models/best_restoration_model.pth"
+ONNX_OUT = "models/best_restoration_model.onnx"
+NUM_CLASSES = 7
 
 
 def main():
     if not os.path.exists(PT_PATH):
-        print(f"[Dental_013] No .pt file found at {PT_PATH}.")
+        print(f"[Dental_013] No .pth file found at {PT_PATH}.")
         return
 
-    print(f"[Dental_013] Exporting {PT_PATH} to ONNX...")
+    print(f"[Dental_013] Exporting {PT_PATH} (EfficientNet-B0 classifier) to ONNX...")
 
     onnx_path = None
     if MODEL_TYPE == "yolo":
         onnx_path = export_yolov8_to_onnx(PT_PATH)
     else:
-        # Implement dummy input for your specific classifier
-        # export_classifier_to_onnx(model, dummy_input, output_path)
-        pass
+        import timm
+        import torch
+
+        model = timm.create_model("efficientnet_b0", pretrained=False, num_classes=NUM_CLASSES)
+        state = torch.load(PT_PATH, map_location="cpu", weights_only=True)
+        model.load_state_dict(state)
+        model.eval()
+        dummy_input = torch.randn(1, 3, 224, 224)
+        onnx_path = export_classifier_to_onnx(model, dummy_input, ONNX_OUT)
 
     if onnx_path and os.path.exists(onnx_path):
         print(f"[Dental_013] Uploading to HuggingFace {REPO_ID}...")

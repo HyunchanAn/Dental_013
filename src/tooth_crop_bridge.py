@@ -3,11 +3,18 @@ import numpy as np
 import torch
 
 from dental_core import LesionAnnotation, PanoramaHiTLDocument
-from predict import (
-    DEFAULT_CROP_CLASS_NAMES,
-    map_raw_restoration_to_ssot,
-    predict_crop_array,
-)
+try:
+    from .predict import (
+        DEFAULT_CROP_CLASS_NAMES,
+        map_raw_restoration_to_ssot,
+        predict_crop_array,
+    )
+except ImportError:
+    from predict import (
+        DEFAULT_CROP_CLASS_NAMES,
+        map_raw_restoration_to_ssot,
+        predict_crop_array,
+    )
 
 
 def extract_padded_tooth_crop(
@@ -97,6 +104,22 @@ def classify_restorations_for_hitl_doc(
     """
     eff_device = device or torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+    # Preserve non-restoration lesions and clinician-corrected restorations; deduplicate AI entries
+    preserved = [
+        l for l in doc.lesions if l.category != "restoration" or l.clinician_corrected
+    ]
+    seen_keys = {
+        (l.fdi, l.label, tuple(round(v, 1) for v in l.bbox_xyxy[:4]))
+        for l in preserved
+        if l.category == "restoration"
+    }
+
+    def _append_unique(lesion: LesionAnnotation) -> None:
+        key = (lesion.fdi, lesion.label, tuple(round(v, 1) for v in lesion.bbox_xyxy[:4]))
+        if key not in seen_keys:
+            seen_keys.add(key)
+            preserved.append(lesion)
+
     # 1. Crop-based classification per Dental_008 tooth
     if crop_model is not None:
         for tooth in doc.teeth:
@@ -113,7 +136,7 @@ def classify_restorations_for_hitl_doc(
             if ssot_cat is not None and conf >= conf_threshold:
                 if ssot_cat not in tooth.restoration_tags:
                     tooth.restoration_tags.append(ssot_cat)
-                doc.lesions.append(
+                _append_unique(
                     LesionAnnotation(
                         category="restoration",
                         label=str(ssot_cat),
@@ -121,21 +144,42 @@ def classify_restorations_for_hitl_doc(
                         fdi=tooth.fdi,
                         confidence=round(conf, 4),
                         rct_associated=(ssot_cat == "Endodontic (RCT)"),
+                        raw_class=str(pred.get("raw_class") or ssot_cat),
                     )
                 )
 
     # 2. Spatial detection attribution (31-class YOLO-seg fusion)
     if spatial_detections:
-        teeth_refs = [{"fdi": t.fdi, "bbox_xyxy": t.bbox_xyxy} for t in doc.teeth]
+        teeth_refs = [
+            {"instance_id": t.instance_id, "fdi": t.fdi, "bbox_xyxy": t.bbox_xyxy}
+            for t in doc.teeth
+        ]
         mapped_map = attribute_detections_to_teeth(spatial_detections, teeth_refs)
-        fdi_to_tooth = {t.fdi: t for t in doc.teeth}
+        id_to_tooth = {t.instance_id: t for t in doc.teeth}
+        fdi_to_teeth: Dict[int, List[Any]] = {}
+        for t in doc.teeth:
+            fdi_to_teeth.setdefault(t.fdi, []).append(t)
+
         for fdi, items in mapped_map.items():
-            target_tooth = fdi_to_tooth.get(fdi)
+            candidates = fdi_to_teeth.get(fdi, [])
             for item in items:
                 cat = item["clinical_category"]
+                target_tooth = None
+                if len(candidates) == 1:
+                    target_tooth = candidates[0]
+                elif len(candidates) > 1:
+                    rx1, ry1, rx2, ry2 = item["bbox"]
+                    rcx, rcy = 0.5 * (rx1 + rx2), 0.5 * (ry1 + ry2)
+                    best_dist = float("inf")
+                    for cand in candidates:
+                        tx1, ty1, tx2, ty2 = cand.bbox_xyxy
+                        d = (rcx - 0.5 * (tx1 + tx2)) ** 2 + (rcy - 0.5 * (ty1 + ty2)) ** 2
+                        if d < best_dist:
+                            best_dist = d
+                            target_tooth = id_to_tooth.get(cand.instance_id, cand)
                 if target_tooth is not None and cat not in target_tooth.restoration_tags:
                     target_tooth.restoration_tags.append(cat)
-                doc.lesions.append(
+                _append_unique(
                     LesionAnnotation(
                         category="restoration",
                         label=cat,
@@ -143,7 +187,9 @@ def classify_restorations_for_hitl_doc(
                         fdi=fdi,
                         confidence=round(float(item["confidence"]), 4),
                         rct_associated=(cat == "Endodontic (RCT)"),
+                        raw_class=str(item.get("raw_class") or cat),
                     )
                 )
 
+    doc.lesions = preserved
     return doc
